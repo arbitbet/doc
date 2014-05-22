@@ -80,11 +80,110 @@ Step 1: Bundle creation
 
 Let's create new *PrestashopBundle* bundle in the way described
 in `documentation <http://www.orocrm.com/documentation/index/current/cookbook/how-to-create-new-bundle>`_. We have to
-create bundle folder and add *OroTutorialPrestashopBundle* and *bundles.yml* config. You can just checkout **step_1** tag.
-After it's done we can clear cache and check that bundle is loaded in symfony's debuger.
+create bundle folder and add *OroTutorialPrestashopBundle* and *bundles.yml* config. After it's done we can clear cache
+and check that bundle is loaded in symfony's debuger.
 
 .. image:: ./images/debug_panel_bundle_check.png
 
+.. note::
 
+    Please checkout **step_1** tag.
 
+Step 2: Initialize entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+We will develop *customer connector* to import customer data from our demo shop. Let's create entity for data storing.
+This will **CustomerEntity** that will extend **BasePerson** entity from *OroBusinessEntitiesBundle*.
+
+.. code-block:: php
+
+    <?php
+
+    namespace OroTutorial\Bundle\PrestashopBundle\Entity;
+
+    use Doctrine\ORM\Mapping as ORM;
+
+    use Oro\Bundle\BusinessEntitiesBundle\Entity\BasePerson;
+    use Oro\Bundle\IntegrationBundle\Model\IntegrationEntityTrait;
+
+    /**
+     * @ORM\Entity
+     * @ORM\Table(
+     *      name="ot_prestashop_customer",
+     *      uniqueConstraints={@ORM\UniqueConstraint(name="unq_remote_id_channel_id", columns={"remote_id", "channel_id"})}
+     * )
+     */
+    class Customer extends BasePerson
+    {
+        use IntegrationEntityTrait;
+
+        /*
+         * Do not use addresses in tutorial
+         */
+        protected $addresses;
+
+        /**
+         * @var integer
+         *
+         * @ORM\Column(name="remote_id", type="integer", options={"unsigned"=true}, nullable=false)
+         */
+        protected $remoteId;
+
+        /**
+         * @param int $remoteId
+         *
+         * @return $this
+         */
+        public function setRemoteId($remoteId)
+        {
+            $this->remoteId = $remoteId;
+        }
+
+        /**
+         * @return int
+         */
+        public function getRemoteId()
+        {
+            return $this->remoteId;
+        }
+    }
+
+We will create simplified version of the import and will improve it in next tutorials. So, let's skip customer addresses for now.
+What's going on ? We define regular doctrine entity that inherit all fields from *BasePerson* except addresses.
+Also we add *ManyToOne* relation on *Channel* entity, to track from what channel instance customer come, another field we added is
+**remoteId** it needs to match local customer with remote one. Now we have to develop migration script and installer for newly created table.
+We will skip it's code here(see on `github <https://github.com/alsma-magecore/OroTutorialPrestashopBundle/blob/step_2/OroTutorial/Bundle/PrestashopBundle/Migrations/Schema/v1_0/OroTutorialPrestashopBundle.php>`_ ),
+you can refer to the `documentation <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/MigrationBundle/README.md>`_
+When migration is ready it can be executed by following console command:
+
+.. code-block:: bash
+
+    app/console oro:migration:load --show-queries --force
+
+Now we can check it's structure.
+
+.. code-block:: bash
+
+    mysql> DESCRIBE ot_prestashop_customer;
+    +-------------+------------------+------+-----+---------+----------------+
+    | Field       | Type             | Null | Key | Default | Extra          |
+    +-------------+------------------+------+-----+---------+----------------+
+    | id          | int(11)          | NO   | PRI | NULL    | auto_increment |
+    | channel_id  | smallint(6)      | YES  | MUL | NULL    |                |
+    | remote_id   | int(10) unsigned | NO   | MUL | NULL    |                |
+    | name_prefix | varchar(255)     | YES  |     | NULL    |                |
+    | first_name  | varchar(255)     | YES  |     | NULL    |                |
+    | middle_name | varchar(255)     | YES  |     | NULL    |                |
+    | last_name   | varchar(255)     | YES  |     | NULL    |                |
+    | name_suffix | varchar(255)     | YES  |     | NULL    |                |
+    | gender      | varchar(8)       | YES  |     | NULL    |                |
+    | birthday    | datetime         | YES  |     | NULL    |                |
+    | email       | varchar(255)     | YES  |     | NULL    |                |
+    | createdAt   | datetime         | NO   |     | NULL    |                |
+    | updatedAt   | datetime         | NO   |     | NULL    |                |
+    +-------------+------------------+------+-----+---------+----------------+
+    13 rows in set (0.00 sec)
+
+.. note::
+
+    Please checkout **step_2** tag.
