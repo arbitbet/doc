@@ -34,7 +34,7 @@ General purpose of this bundle is to allow developers create integration bundles
 OroIntegrationBundle's terms
 ----------------------------
 
-.. image:: images/elephants.jpeg
+.. image:: images/elephants.jpg
    :alt:   Integration bundle elephants
    :align: right
 
