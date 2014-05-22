@@ -261,9 +261,9 @@ It will not be shown in the channel type selector until it has at least one comp
 
 Transport declaration requires two steps:
 
-  * Implement transport type(dummy for this step)
-  * Create form that will shown on channel configuration page
-  * Create entity that will store transport settings
+* Implement transport type(dummy for this step)
+* Create form that will shown on channel configuration page
+* Create entity that will store transport settings
 
 .. code-block:: php
 
@@ -319,11 +319,11 @@ Transport declaration requires two steps:
 
 Interface says that we need to implement following methods:
 
-  * **init** - configure transport by it's settings
-  * **call** - do some action with remote instance
-  * **getLabel** - returns label for UI (if channel have only one transport than selector will not be shown)
-  * **getSettingsFormType** - returns form type to bring settings (will be added next)
-  * **getSettingsEntityFQCN** - entity class name to store settings in
+* **init** - configure transport by it's settings
+* **call** - do some action with remote instance
+* **getLabel** - returns label for UI (if channel have only one transport than selector will not be shown)
+* **getSettingsFormType** - returns form type to bring settings (will be added next)
+* **getSettingsEntityFQCN** - entity class name to store settings in
 
 .. note::
 
