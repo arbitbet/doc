@@ -98,7 +98,7 @@ This will be **CustomerEntity** that will extend **BasePerson** entity from *Oro
 .. code-block:: php
 
     <?php
-
+    // src/OroTutorial/Bundle/PrestashopBundle/Entity/Customer.php
     namespace OroTutorial\Bundle\PrestashopBundle\Entity;
 
     use Doctrine\ORM\Mapping as ORM;
@@ -150,16 +150,17 @@ This will be **CustomerEntity** that will extend **BasePerson** entity from *Oro
 
 We will create simplified version of the import and will improve it in next tutorials. So, let's skip customer addresses for now.
 
-What's going on ? We define regular doctrine entity that inherit all fields from *BasePerson* except addresses.
+What's going on ? We defined regular doctrine entity that inherit all fields from *BasePerson* except addresses.
 Also we added *ManyToOne* relation on *Channel* entity, in order to track from what channel instance customer come. Another field we added is
 **remoteId** it needs to match local customer with remote one. Now we have to develop migration script and installer for newly created table.
 We will skip it's code here(see it on `github <https://github.com/alsma-magecore/OroTutorialPrestashopBundle/blob/step_2/OroTutorial/Bundle/PrestashopBundle/Migrations/Schema/v1_0/OroTutorialPrestashopBundle.php>`_ ),
-you can refer to the `documentation <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/MigrationBundle/README.md>`_.
+you can refer to the `documentation <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/MigrationBundle/README.md>`_ how to develop it.
 
 When migration is ready it can be executed by following console command:
 
 .. code-block:: bash
 
+    # from platform's root folder
     app/console oro:migration:load --show-queries --force
 
 Now we can check it's structure.
@@ -189,3 +190,141 @@ Now we can check it's structure.
 .. note::
 
     Please checkout **step_2** tag.
+
+Step 3: Channel type
+^^^^^^^^^^^^^^^^^^^^
+
+Now it's time to define new **channel type**. Our bundle defines additional services in DIC because of this we should add bundle extension,
+that will load our config.
+
+.. code-block:: php
+
+    <?php
+    // src/OroTutorial/Bundle/PrestashopBundle/DependencyInjection/OroTutorialPrestashopExtension.php
+    namespace OroCRM\Bundle\MagentoBundle\DependencyInjection;
+
+    use Symfony\Component\Config\FileLocator;
+    use Symfony\Component\DependencyInjection\Loader;
+    use Symfony\Component\DependencyInjection\ContainerBuilder;
+    use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+
+    class OroTutorialPrestashopExtension extends Extension
+    {
+        /**
+         * {@inheritDoc}
+         */
+        public function load(array $configs, ContainerBuilder $container)
+        {
+            $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+            $loader->load('services.yml');
+        }
+    }
+
+Then we are creating our channel type class. It's placed into *Provider* folder and called *PrestashopChannelType*.
+As described in the `documentation <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/IntegrationBundle/README.md#channel-type-definition>`_
+it should implements ``Oro\Bundle\IntegrationBundle\Provider\ChannelInterface`` that is very simple. Let's do it!
+
+.. code-block:: php
+
+    <?php
+    // src/OroTutorial/Bundle/PrestashopBundle/Provider/PrestashopChannelType.php
+    namespace OroTutorial\Bundle\PrestashopBundle\Provider;
+
+    use Oro\Bundle\IntegrationBundle\Provider\ChannelInterface;
+
+    class PrestashopChannelType implements ChannelInterface
+    {
+        /**
+         * {@inheritdoc}
+         */
+        public function getLabel()
+        {
+            return 'Prestashop'; // this string will be translated via symfony's translator
+        }
+    }
+
+And last thing left - to declare a service for it.
+
+.. code-block:: yaml
+
+    # src/OroTutorial/Bundle/PrestashopBundle/Resources/config/services.yml
+    parameters:
+        oro_tutorials.prestashop.provider.prestashop_channel_type.class: OroTutorial\Bundle\PrestashopBundle\Provider\PrestashopChannelType
+
+    services:
+        oro_tutorials.prestashop.provider.prestashop_channel_type:
+            class: %oro_tutorials.prestashop.provider.prestashop_channel_type.class%
+            tags:
+                - { name: oro_integration.channel, type: presta_shop }
+
+It will not be shown in the channel type selector until it has at least one compatible transport.
+
+Transport declaration requires two steps:
+
+  * Implement transport type(dummy for this step)
+  * Create form that will shown on channel configuration page
+  * Create entity that will store transport settings
+
+.. code-block:: php
+
+    <?php
+    // src/OroTutorial/Bundle/PrestashopBundle/Provider/RestTransport.php
+    namespace OroTutorial\Bundle\PrestashopBundle\Provider;
+
+    use Oro\Bundle\IntegrationBundle\Entity\Transport;
+    use Oro\Bundle\IntegrationBundle\Provider\TransportInterface;
+
+    class RestTransport implements TransportInterface
+    {
+        /**
+         * {@inheritdoc}
+         */
+        public function init(Transport $settings)
+        {
+            // TODO: Implement init() method.
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function call($action, $params = [])
+        {
+            // TODO: Implement call() method.
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function getLabel()
+        {
+            return 'REST'; // this string will be translated via symfony's translator
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function getSettingsFormType()
+        {
+            return 'oro_tutorials_prestashop_form_rest_transport_type';
+        }
+
+        /**
+         * {@inheritdoc}
+         */
+        public function getSettingsEntityFQCN()
+        {
+            return 'OroTutorial\Bundle\PrestashopBundle\Entity\RestTransport';
+        }
+    }
+
+Interface says that we need to implement following methods:
+
+  * **init** - configure transport by it's settings
+  * **call** - do some action with remote instance
+  * **getLabel** - returns label for UI (if channel have only one transport than selector will not be shown)
+  * **getSettingsFormType** - returns form type to bring settings (will be added next)
+  * **getSettingsEntityFQCN** - entity class name to store settings in
+
+.. note::
+
+    Please checkout **step_3** tag.
