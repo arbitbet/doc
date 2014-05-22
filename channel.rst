@@ -38,3 +38,26 @@ OroIntegrationBundle's terms
    :alt:   Integration bundle elephants
    :align: right
 
+OroIntegrationBundle provides 4 terms:  *channel type*, *channel*, *transport*, *connector* so let's determine what's
+each of them mean.
+
+Channel type
+    Groups related to single third party application service classes and objects. For example: magento channel type,
+    google channel type etc..
+
+Channel
+    Configured instance of some channel type and include set of configuration(such as connection settings etc)
+
+Transport
+    It's an object that knows how to retrieve data from channel instance. It knows  which entity should store connection settings,
+    label for UI usage, and form type that is responsible to bring settings from channel creation page. Example of transport:
+    SOAP transport, REST transport, direct database connection and much more.
+
+Connector
+    Generally it's reader in terms of OroImportExportBundle. Connector knows how to retrieve data of the given type from remote instance
+    using any type of compatible transport for the given channel. Example of connector: Customer connector for ebay channel type.
+
+Let's put them in one chain. So, we are able to create *channel* which is an instance of some *channel type* and contains
+some set of configuration such as which *transport* to use to retrieve data specified by enabled *connectors*.
+
+More technical information could be found in bundle's `readme <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/IntegrationBundle/README.md>`_.
