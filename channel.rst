@@ -150,10 +150,11 @@ This will **CustomerEntity** that will extend **BasePerson** entity from *OroBus
 
 We will create simplified version of the import and will improve it in next tutorials. So, let's skip customer addresses for now.
 What's going on ? We define regular doctrine entity that inherit all fields from *BasePerson* except addresses.
-Also we add *ManyToOne* relation on *Channel* entity, to track from what channel instance customer come, another field we added is
+Also we added *ManyToOne* relation on *Channel* entity, to track from what channel instance customer come, another field we added is
 **remoteId** it needs to match local customer with remote one. Now we have to develop migration script and installer for newly created table.
 We will skip it's code here(see on `github <https://github.com/alsma-magecore/OroTutorialPrestashopBundle/blob/step_2/OroTutorial/Bundle/PrestashopBundle/Migrations/Schema/v1_0/OroTutorialPrestashopBundle.php>`_ ),
-you can refer to the `documentation <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/MigrationBundle/README.md>`_
+you can refer to the `documentation <https://github.com/orocrm/platform/blob/master/src/Oro/Bundle/MigrationBundle/README.md>`_.
+
 When migration is ready it can be executed by following console command:
 
 .. code-block:: bash
