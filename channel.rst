@@ -394,7 +394,7 @@ Here it is.
         }
     }
 
-We'll skip migration code here, but keep in mind that it also required.
+We'll skip migration code here, but keep in mind that it's also required.
 I hope that entity fields are self explainable and we can move forward.
 Now the time is to create form type to fill the settings into entity.
 
@@ -459,9 +459,9 @@ Now the time is to create form type to fill the settings into entity.
         }
     }
 
-We injected the *real transport* into the form type to get entity class name. Also please take into account that we skipped
-api key encryption, but it's required for the real use.
-Let's define dummy connector class.
+We injected the *real transport* object into the form type to get entity class name. Also please take into account that we skipped
+api key encryption, but it's required for the real world usage.
+Let's define connector class(dummy for this step).
 
 .. code-block:: php
 
